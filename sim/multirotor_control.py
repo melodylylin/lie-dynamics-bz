@@ -181,7 +181,7 @@ def plot_sim(ref, abound, omegabound, flowpipes, num_pipes, axis):
     
     label_added =False
     for f in freq:
-        res = simulate_rover(ref, f, abound, omegabound, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 'sine')
+        res = simulate_rover(ref, f, abound, omegabound, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 'sine') # where you change the inital error value
         t = res['t']
     
         y_vect = res['y']
