@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from flowpipe.outer_bound import inv_bound
 from bezier.bezier_planning import *
 
-bezier6 = derive_bezier6()
+bezier7 = derive_bezier7()
 
 def se23_solve_control(ax,ay,az,omega1,omega2,omega3):
     A = -ca.DM(SE23Dcm.ad_matrix(np.array([0,0,0,ax,ay,az,omega1,omega2,omega3]))+SE23Dcm.adC_matrix())
@@ -44,14 +44,14 @@ def compute_control(t, y_vect, ref, freq_d, w1_mag, w2_mag, dist): # w1_mag: acc
     zr = ref['anchor_z']
     for i in range(T.shape[0]):
         if i==0 and t <= T[i]:
-            traj_x = np.array(bezier6['bezier6_traj'](t, ref['T0'][i], xr[i])).T
-            traj_y = np.array(bezier6['bezier6_traj'](t, ref['T0'][i], yr[i])).T
-            traj_z = np.array(bezier6['bezier6_traj'](t, ref['T0'][i], zr[i])).T
+            traj_x = np.array(bezier7['bezier7_traj'](t, ref['T0'][i], xr[i])).T
+            traj_y = np.array(bezier7['bezier7_traj'](t, ref['T0'][i], yr[i])).T
+            traj_z = np.array(bezier7['bezier7_traj'](t, ref['T0'][i], zr[i])).T
             break
         elif T[i-1] < t <= T[i]:
-            traj_x = np.array(bezier6['bezier6_traj'](t-np.sum(T_opt[:i]), ref['T0'][i], xr[i])).T
-            traj_y = np.array(bezier6['bezier6_traj'](t-np.sum(T_opt[:i]), ref['T0'][i], yr[i])).T
-            traj_z = np.array(bezier6['bezier6_traj'](t-np.sum(T_opt[:i]), ref['T0'][i], zr[i])).T
+            traj_x = np.array(bezier7['bezier7_traj'](t-np.sum(T_opt[:i]), ref['T0'][i], xr[i])).T
+            traj_y = np.array(bezier7['bezier7_traj'](t-np.sum(T_opt[:i]), ref['T0'][i], yr[i])).T
+            traj_z = np.array(bezier7['bezier7_traj'](t-np.sum(T_opt[:i]), ref['T0'][i], zr[i])).T
 
     # reference input at time t
     # world frame
@@ -94,7 +94,7 @@ def compute_control(t, y_vect, ref, freq_d, w1_mag, w2_mag, dist): # w1_mag: acc
         phi = 0.8
         phi2 = 0.5
         wax = np.cos(2*np.pi*freq_d*t+phi)*w1_mag
-        way = np.sin(2*np.pi*freq_d*t+phi)*w1_mag/np.sqrt(2)
+        way = np.sin(2*np.pi*freq_d*t+phi)*w1_mag
         waz = np.sin(2*np.pi*freq_d*t+phi)*w1_mag
         womega1 = np.cos(2*np.pi*freq_d*t+phi2)*w2_mag
         womega2 = np.sin(2*np.pi*freq_d*t+phi2)*w2_mag
@@ -167,7 +167,7 @@ def compute_exp_log_err(rx, ry, rz, rvx, rvy, rvz, rtheta1, rtheta2, rtheta3, ex
     return x_vect
 
 def plot_sim(ref, abound, omegabound, flowpipes, num_pipes, axis):
-    freq = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.5]#, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09]
+    freq = [0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85]
 
     fig = plt.figure(figsize=(15,15))
     plt.rcParams.update({'font.size': 18})
@@ -191,14 +191,14 @@ def plot_sim(ref, abound, omegabound, flowpipes, num_pipes, axis):
         for j in range(len(t)):
             for i in range(T.shape[0]):
                 if i==0 and t[j] <= T[i]:
-                    traj_x = np.array(bezier6['bezier6_traj'](t[j], ref['T0'][i], xr[i])).T
-                    traj_y = np.array(bezier6['bezier6_traj'](t[j], ref['T0'][i], yr[i])).T
-                    traj_z = np.array(bezier6['bezier6_traj'](t[j], ref['T0'][i], zr[i])).T
+                    traj_x = np.array(bezier7['bezier7_traj'](t[j], ref['T0'][i], xr[i])).T
+                    traj_y = np.array(bezier7['bezier7_traj'](t[j], ref['T0'][i], yr[i])).T
+                    traj_z = np.array(bezier7['bezier7_traj'](t[j], ref['T0'][i], zr[i])).T
                     break
                 elif T[i-1] < t[j] <= T[i]:
-                    traj_x = np.array(bezier6['bezier6_traj'](t[j]-np.sum(T_opt[:i]), ref['T0'][i], xr[i])).T
-                    traj_y = np.array(bezier6['bezier6_traj'](t[j]-np.sum(T_opt[:i]), ref['T0'][i], yr[i])).T
-                    traj_z = np.array(bezier6['bezier6_traj'](t[j]-np.sum(T_opt[:i]), ref['T0'][i], zr[i])).T
+                    traj_x = np.array(bezier7['bezier7_traj'](t[j]-np.sum(T_opt[:i]), ref['T0'][i], xr[i])).T
+                    traj_y = np.array(bezier7['bezier7_traj'](t[j]-np.sum(T_opt[:i]), ref['T0'][i], yr[i])).T
+                    traj_z = np.array(bezier7['bezier7_traj'](t[j]-np.sum(T_opt[:i]), ref['T0'][i], zr[i])).T
 
             # reference input at time t
             # world frame
@@ -279,26 +279,32 @@ def plot_timehis(sol_LMI, ref, abound, omegabound, n_time, ebeta):
     fig.subplots_adjust(hspace=0.2, top=0.95)
 
     # calculte bound along time (small disturbance case)
-    T0_list = ref['T']
-    T = np.cumsum(T0_list)
+    T_opt = ref['T0']
+    T = np.cumsum(T_opt)
+    xr = ref['anchor_x']
+    yr = ref['anchor_y']
+    zr = ref['anchor_z']
+
     t_vect = np.linspace(1e-5,T[-1],n_time)
     invbound = np.zeros((6,n_time))
-    for j in range(0,n_time):
+    ref_points = np.zeros((1,n_time))
+    for j in range(len(t_vect)):
         for i in range(T.shape[0]):
             if i==0 and t_vect[j] <= T[i]:
-                xr = np.flip(ref['poly_x'][0:8])
-                yr = np.flip(ref['poly_y'][0:8])
-                zr = np.flip(ref['poly_z'][0:8])
-                beta = t_vect[j]/T0_list[0]
+                traj_x = np.array(bezier7['bezier7_traj'](t_vect[j], ref['T0'][i], xr[i])).T
+                traj_y = np.array(bezier7['bezier7_traj'](t_vect[j], ref['T0'][i], yr[i])).T
+                traj_z = np.array(bezier7['bezier7_traj'](t_vect[j], ref['T0'][i], zr[i])).T
                 break
             elif T[i-1] < t_vect[j] <= T[i]:
-                xr = np.flip(ref['poly_x'][8*(i):8*(i+1)])
-                yr = np.flip(ref['poly_y'][8*(i):8*(i+1)])
-                zr = np.flip(ref['poly_z'][8*(i):8*(i+1)])
-                beta = (t_vect[j]-np.sum(T0_list[:i]))/T0_list[i]
-        rx = np.polyval(xr, beta)
-        ry = np.polyval(yr, beta)
-        rz = np.polyval(zr, beta)
+                traj_x = np.array(bezier7['bezier7_traj'](t_vect[j]-np.sum(T_opt[:i]), ref['T0'][i], xr[i])).T
+                traj_y = np.array(bezier7['bezier7_traj'](t_vect[j]-np.sum(T_opt[:i]), ref['T0'][i], yr[i])).T
+                traj_z = np.array(bezier7['bezier7_traj'](t_vect[j]-np.sum(T_opt[:i]), ref['T0'][i], zr[i])).T
+
+        # reference input at time t
+        # world frame
+        rx = traj_x[:,0][0]
+        ry = traj_y[:,0][0]
+        rz = traj_z[:,0][0]
         ib = inv_bound(sol_LMI, t_vect[i], abound, omegabound, ebeta)
         ib[0] = rx + ib[0]
         ib[1] = ry + ib[1]
@@ -307,11 +313,12 @@ def plot_timehis(sol_LMI, ref, abound, omegabound, n_time, ebeta):
         ib[4] = ry + ib[4]
         ib[5] = rz + ib[5]
         invbound[:,j] = ib
+        ref_points[:,j] = rz
 
-    freq = [0.01] #[0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09]
+    freq = [0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85]
     label_added =False
     for f in freq:
-        res = simulate_rover(ref, f, abound, omegabound, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'sine')
+        res = simulate_rover(ref, f, abound, omegabound, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 'sine') # where you change the inital error value
         t = res['t']
     
         y_vect = res['y']
@@ -321,47 +328,32 @@ def plot_timehis(sol_LMI, ref, abound, omegabound, n_time, ebeta):
         for j in range(len(t)):
             for i in range(T.shape[0]):
                 if i==0 and t[j] <= T[i]:
-                    xr = np.flip(ref['poly_x'][0:8])
-                    yr = np.flip(ref['poly_y'][0:8])
-                    zr = np.flip(ref['poly_z'][0:8])
-                    beta = t[j]/T0_list[0]
+                    traj_x = np.array(bezier7['bezier7_traj'](t[j], ref['T0'][i], xr[i])).T
+                    traj_y = np.array(bezier7['bezier7_traj'](t[j], ref['T0'][i], yr[i])).T
+                    traj_z = np.array(bezier7['bezier7_traj'](t[j], ref['T0'][i], zr[i])).T
                     break
                 elif T[i-1] < t[j] <= T[i]:
-                    xr = np.flip(ref['poly_x'][8*(i):8*(i+1)])
-                    yr = np.flip(ref['poly_y'][8*(i):8*(i+1)])
-                    zr = np.flip(ref['poly_z'][8*(i):8*(i+1)])
-                    beta = (t[j]-np.sum(T0_list[:i]))/T0_list[i]
-
-            vx_opt = np.polyder(xr)
-            vy_opt = np.polyder(yr)
-            vz_opt = np.polyder(zr)
-            ax_opt = np.polyder(vx_opt)
-            ay_opt = np.polyder(vy_opt)
-            az_opt = np.polyder(vz_opt)
-            jx_opt = np.polyder(ax_opt)
-            jy_opt = np.polyder(ay_opt)
-            jz_opt = np.polyder(az_opt)
-            sx_opt = np.polyder(jx_opt)
-            sy_opt = np.polyder(jy_opt)
-            sz_opt = np.polyder(jz_opt)
+                    traj_x = np.array(bezier7['bezier7_traj'](t[j]-np.sum(T_opt[:i]), ref['T0'][i], xr[i])).T
+                    traj_y = np.array(bezier7['bezier7_traj'](t[j]-np.sum(T_opt[:i]), ref['T0'][i], yr[i])).T
+                    traj_z = np.array(bezier7['bezier7_traj'](t[j]-np.sum(T_opt[:i]), ref['T0'][i], zr[i])).T
 
             # reference input at time t
             # world frame
-            r_x = np.polyval(xr, beta)
-            r_y = np.polyval(yr, beta)
-            r_z = np.polyval(zr, beta)
-            r_vx = np.polyval(vx_opt, beta)
-            r_vy = np.polyval(vy_opt, beta)
-            r_vz = np.polyval(vz_opt, beta)
-            r_ax = np.polyval(ax_opt, beta)
-            r_ay = np.polyval(ay_opt, beta)
-            r_az = np.polyval(az_opt, beta)
-            r_jx = np.polyval(jx_opt, beta)
-            r_jy = np.polyval(jy_opt, beta)
-            r_jz = np.polyval(jz_opt, beta)
-            r_sx = np.polyval(sx_opt, beta)
-            r_sy = np.polyval(sy_opt, beta)
-            r_sz = np.polyval(sz_opt, beta)
+            r_x = traj_x[:,0][0]
+            r_y = traj_y[:,0][0]
+            r_z = traj_z[:,0][0]
+            r_vx = traj_x[:,1][0]
+            r_vy = traj_y[:,1][0]
+            r_vz = traj_z[:,1][0]
+            r_ax = traj_x[:,2][0]
+            r_ay = traj_y[:,2][0]
+            r_az = traj_z[:,2][0]
+            r_jx = traj_x[:,3][0]
+            r_jy = traj_y[:,3][0]
+            r_jz = traj_z[:,3][0]
+            r_sx = traj_x[:,4][0]
+            r_sy = traj_y[:,4][0]
+            r_sz = traj_z[:,4][0]
             ref_v = f_ref(0, 0, 0, [r_vx, r_vy, r_vz], [r_ax, r_ay, r_az], [r_jx, r_jy, r_jz], [r_sx, r_sy, r_sz], 1, 9.8, 1, 1, 1, 0)
             R = ref_v[1]
             theta = ca.DM(Euler.from_dcm(R))
@@ -372,7 +364,7 @@ def plot_timehis(sol_LMI, ref, abound, omegabound, n_time, ebeta):
             omega = ref_v[2]
             omega = np.array(omega).reshape(3,)
             exp_log_err[:,j] = np.array([compute_exp_log_err(r_x, r_y, r_z, r_vx, r_vy, r_vz, r_theta1, r_theta2, r_theta3,
-                                                            ex[j], ey[j], ez[j], evx[j], evy[j], evz[j], etheta1[j], etheta2[j], etheta3[j])])
+                                                             ex[j], ey[j], ez[j], evx[j], evy[j], evz[j], etheta1[j], etheta2[j], etheta3[j])])
             # exp_log_errsq[:,j] = np.array([compute_exp_log_err(r_x, r_y, r_z, r_vx, r_vy, r_vz, r_theta1, r_theta2, r_theta3,
             #                                                 exsq[j], eysq[j], ezsq[j], evxsq[j], evysq[j], evzsq[j], etheta1sq[j], etheta2sq[j], etheta3sq[j])])
     
@@ -382,8 +374,8 @@ def plot_timehis(sol_LMI, ref, abound, omegabound, n_time, ebeta):
         else:
             plt.plot(t, exp_log_err[2,:], 'g',linewidth=0.5)
 
-    t_vect = np.linspace(1e-5,np.cumsum(T0_list)[-1],n_time)
-    plt.plot(ref['t'], ref['z'], 'r', label='ref z')
+    t_vect = np.linspace(1e-5,np.cumsum(T_opt)[-1],n_time)
+    plt.plot(t_vect, ref_points.reshape(30,), 'r', label='ref z')
     plt.plot(t_vect, invbound[2,:], 'c', label='LMI')
     plt.plot(t_vect, invbound[5,:], 'c')
     plt.xlabel('t, sec')
