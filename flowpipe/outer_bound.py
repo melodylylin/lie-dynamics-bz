@@ -5,6 +5,8 @@ import itertools
 import scipy
 from lie.SE23 import *
 from lie.se3 import *
+from cyecca.lie.group_so3 import so3
+from cyecca.lie.group_se23 import se23
 
 def se23_solve_control(ax,ay,az,omega1,omega2,omega3):
     A = -ca.DM(SE23Dcm.ad_matrix(np.array([0,0,0,ax,ay,az,omega1,omega2,omega3]))+SE23Dcm.adC_matrix())
