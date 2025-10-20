@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from lie.se3 import *
 from .IntervalHull import qhull2D, minBoundingRect
 from .outer_bound import se23_invariant_set_points, se23_invariant_set_points_theta, exp_map
+from .IntervalHull3d import bbox
 
 def rotate_point(point, angle):
     new_point = np.array([point[0] * np.cos(angle) - point[1] * np.sin(angle),
@@ -91,6 +92,69 @@ def flowpipes(ref, n, beta, w1, omegabound, sol, axis):
         
         a = b
     return flowpipes, intervalhull, nom, t_vect
+
+def flowpipes_3d(ref, n, beta, w1, omegabound, sol):
+    x_r = ref['x']
+    y_r = ref['y']
+    z_r = ref['z']
+    
+    #####NEED to change this if wants to show different axis#####
+    nom = np.array([x_r,y_r,z_r]).T
+    flowpipes = []
+    intervalhull = []
+    t_vect = []
+    
+    step0 = int(len(x_r)/n)
+    
+    a = 0    
+    for i in range(n):
+        if i < len(x_r)%n:
+            steps = step0 + 1
+        else:
+            steps = step0
+        b = a + steps
+        if i == n-1:
+            nom_i = nom[a:len(x_r)+1,:]
+            if nom_i.shape[0] < 3:
+                nom_i = np.vstack((nom_i, np.array(nom[-1,:])+0.01))
+        else:
+            nom_i = nom[a:b+1,:]
+        corner_points = bbox(nom_i.T)
+
+        t = 0.05*a
+        t_vect.append(t)
+        
+        if t == 0:
+            t = 1e-3
+        points, val1 = se23_invariant_set_points(sol, t, w1, omegabound, beta) # invariant set at t0 in that time interval
+        points2, val2 = se23_invariant_set_points(sol, 0.05*b, w1, omegabound, beta) # invariant set at t final in that time interval
+        points_theta, _ = se23_invariant_set_points_theta(sol, t, w1, omegabound, beta)
+        
+        if val2 > val1: 
+            points = points2
+            points_theta, _ = se23_invariant_set_points_theta(sol, 0.05*b, w1, omegabound, beta)
+
+        inv_points = exp_map(points, points_theta)
+
+        P2 = Polytope(inv_points.T) 
+        
+        # minkowski sum
+        P1 = Polytope(corner_points.T) # interval hull
+        
+        P = P1 + P2 # sum
+
+        p1_vertices = P1.V
+        p_vertices = P.V
+
+        p_vertices = np.append(p_vertices, p_vertices[0].reshape(1,3), axis = 0) # add the first point to last, or the flow pipes will miss one line
+        
+        # create list for flow pipes and interval hull
+        flowpipes.append(p_vertices)
+        intervalhull.append(P1.V)
+        
+        a = b
+    return flowpipes, intervalhull, nom, t_vect
+
 
 def plot_flowpipes(nom, flowpipes, n, axis):
     # flow pipes

@@ -3,8 +3,10 @@ import numpy as np
 import scipy.optimize
 import matplotlib.pyplot as plt
 import casadi as ca
-from sim.multirotor_ref_traj import f_ref
 from lie.SE23 import *
+from cyecca.models.bezier import derive_ref
+
+f_ref = derive_ref()["f_ref"]
 
 # See
 # Richter, Charles, Adam Bry, and Nicholas Roy.
@@ -330,13 +332,13 @@ def planner(bc, cost, n_legs, poly_deg, k_time):
         r_sx = sx[j]
         r_sy = sy[j]
         r_sz = sz[j]
-        ref_v = f_ref(0, 0, 0, [r_vx, r_vy, r_vz], [r_ax, r_ay, r_az], [r_jx, r_jy, r_jz], [r_sx, r_sy, r_sz], 1, 9.8, 1, 1, 1, 0)
-        R = ref_v[1]
-        theta = ca.DM(Euler.from_dcm(R))
-        theta = np.array(theta).reshape(3,)
-        r_theta1 = theta[0]
-        r_theta2 = theta[1]
-        r_theta3 = theta[2]
+        ref_v = f_ref(0, 0, 0, [r_vx, r_vy, r_vz], [r_ax, r_ay, r_az], [r_jx, r_jy, r_jz], [r_sx, r_sy, r_sz])
+        # R = ref_v[1]
+        # theta = ca.DM(Euler.from_dcm(R))
+        # theta = np.array(theta).reshape(3,)
+        # r_theta1 = theta[0]
+        # r_theta2 = theta[1]
+        # r_theta3 = theta[2]
         omega = ref_v[2]
         omega = np.array(omega).reshape(3,)
         r_omega1 = omega[0]

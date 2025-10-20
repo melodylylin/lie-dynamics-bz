@@ -136,7 +136,7 @@ M_b = J @ omega_dot_eb_b + ca.cross(omega_eb_b, J @ omega_eb_b)
 # Code Generation
 
 v_b = C_eb @ v_e
-f_ref = ca.Function(
+f = ca.Function(
     "f_ref",
     [psi, psi_dot, psi_ddot, v_e, a_e, j_e, s_e, m, g, J_xx, J_yy, J_zz, J_xz],
     [v_b, C_be, omega_eb_b, omega_dot_eb_b, M_b, T],
@@ -157,7 +157,7 @@ f_ref = ca.Function(
     ],
     ["v_b", "C_be", "omega_eb_b", "omega_dot_eb_b", "M_b", "T"],
 )
-res = f_ref(1, 0, 0, [1, 1, 1], [1, 1, 1], [1, 1, 1], [1, 1, 1], 1, 9.8, 1, 1, 1, 0)
+res = f(1, 0, 0, [1, 1, 1], [1, 1, 1], [1, 1, 1], [1, 1, 1], 1, 9.8, 1, 1, 1, 0)
 res
 
 # c code generation

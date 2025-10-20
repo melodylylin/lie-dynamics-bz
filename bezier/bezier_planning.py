@@ -7,9 +7,10 @@ from zipfile import ZipFile
 import os
 import datetime
 from .TimeOptBez import *
-from sim.multirotor_ref_traj import f_ref
 from lie.SE23 import *
+from cyecca.models.bezier import derive_ref
 
+f_ref = derive_ref()["f_ref"]
 
 class Bezier:
 #https://en.wikipedia.org/wiki/B%C3%A9zier_curve
@@ -143,11 +144,11 @@ def multirotor_timeOpt(bc,k_time): ## Currently outputs optimized time
     time_opt = find_opt_time(6, bc,k_time)
     return np.average(time_opt)
 
-def multirotor_plan(bc,T0):
+def multirotor_plan(bc,T0, dt):
     bezier_7 = derive_bezier7()
 
     bc = np.array(bc)
-    t0 = np.linspace(0, T0, 100)
+    t0 = np.arange(0, T0, dt)
 
     PX = bezier_7['bezier7_solve'](bc[:, 0, 0], bc[:, 1, 0], T0)
     traj_x = np.array(bezier_7['bezier7_traj'](np.array([t0]), T0, PX)).T
@@ -158,11 +159,51 @@ def multirotor_plan(bc,T0):
     PZ = bezier_7['bezier7_solve'](bc[:, 0, 2], bc[:, 1, 2], T0)
     traj_z = np.array(bezier_7['bezier7_traj'](np.array([t0]), T0, PZ)).T
 
-    # V = np.sqrt(vx**2 + vy**2)
+    # V = np.sqrt(vx**2 + vy**2)bc_t = np.array([
+    #         [ # position
+    #         [0, 0, 0],  
+    #         [0, 0, 2],    
+    #         [0, 0, 5], 
+    #         [120, -3.05, 5],
+    #         [160, -5.2, 5],
+    #         [229.7, -9.6, 4],
+    #         [229.7, -9.6, 4],
+    #         [229.7, -9.6, 2],
+    #         ],
+    #         [ # velocity
+    #         [0, 0, 0.1],  
+    #         [0, 0, 0.1], 
+    #         [0, 0, 0],
+    #         [2.2, -0.1, 0],
+    #         [2.2, -0.1, 0],
+    #         [2.2, -0.1, 0],
+    #         [0, 0, 0],  # wp0, x, y, z
+    #         [0, 0, 0],
+    #         ],
+    #         [ # accel
+    #         [0, 0, 0], 
+    #         [0, 0, 0],
+    #         [0, 0, 0],
+    #         [0, 0, 0],
+    #         [0, 0, 0],
+    #         [0, 0, 0],
+    #         [0, 0, 0],
+    #         [0, 0, 0],
+    #         ],
+    #         [ # jerk
+    #         [0, 0, 0],
+    #         [0, 0, 0],
+    #         [0, 0, 0],
+    #         [0, 0, 0],
+    #         [0, 0, 0],
+    #         [0, 0, 0],
+    #         [0, 0, 0],
+    #         [0, 0, 0],
+    #         ]])
 
     return PX, PY, PZ, traj_x, traj_y, traj_z, t0
 
-def generate_path(bc_t, k):
+def generate_path(bc_t, k, dt, T0):
     
     t_total = 0
     res = {
@@ -184,8 +225,7 @@ def generate_path(bc_t, k):
 
     for i in range(bc_t.shape[1]-1):
         bc = bc_t[:,i:i+2,:]
-        T0 = 2
-        Px, Py, Pz, traj_x, traj_y, traj_z, t0 = multirotor_plan(bc,T0)
+        Px, Py, Pz, traj_x, traj_y, traj_z, t0 = multirotor_plan(bc, T0, dt)
         t = t_total + t0
         t_total = t_total + T0 
         x = traj_x[:, 0]
@@ -221,13 +261,14 @@ def generate_path(bc_t, k):
             r_sx = sx[j]
             r_sy = sy[j]
             r_sz = sz[j]
-            ref_v = f_ref(0, 0, 0, [r_vx, r_vy, r_vz], [r_ax, r_ay, r_az], [r_jx, r_jy, r_jz], [r_sx, r_sy, r_sz], 1, 9.8, 1, 1, 1, 0)
-            R = ref_v[1]
-            theta = ca.DM(Euler.from_dcm(R))
-            theta = np.array(theta).reshape(3,)
-            r_theta1 = theta[0]
-            r_theta2 = theta[1]
-            r_theta3 = theta[2]
+            ref_v = f_ref(0, 0, 0, [r_vx, r_vy, r_vz], [r_ax, r_ay, r_az], [r_jx, r_jy, r_jz], [r_sx, r_sy, r_sz])
+            # R = ref_v[1]
+            # print(R)
+            # theta = ca.DM(Euler.from_dcm(R))
+            # theta = np.array(theta).reshape(3,)
+            # r_theta1 = theta[0]
+            # r_theta2 = theta[1]
+            # r_theta3 = theta[2]
             omega = ref_v[2]
             omega = np.array(omega).reshape(3,)
             r_omega1 = omega[0]
