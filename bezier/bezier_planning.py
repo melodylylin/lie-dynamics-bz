@@ -11,6 +11,12 @@ from lie.SE23 import *
 from cyecca.models.bezier import derive_ref
 
 f_ref = derive_ref()["f_ref"]
+m = 2.0
+g = 9.8
+Jx = 0.02166666666666667
+Jy = 0.02166666666666667
+Jz = 0.04000000000000001
+Jxz = 0.0
 
 class Bezier:
 #https://en.wikipedia.org/wiki/B%C3%A9zier_curve
@@ -261,7 +267,7 @@ def generate_path(bc_t, k, dt, T0):
             r_sx = sx[j]
             r_sy = sy[j]
             r_sz = sz[j]
-            ref_v = f_ref(0, 0, 0, [r_vx, r_vy, r_vz], [r_ax, r_ay, r_az], [r_jx, r_jy, r_jz], [r_sx, r_sy, r_sz])
+            ref_v = f_ref(0, 0, 0, [r_vx, r_vy, r_vz], [r_ax, r_ay, r_az], [r_jx, r_jy, r_jz], [r_sx, r_sy, r_sz], m, g, Jx, Jy, Jz, Jxz)
             # R = ref_v[1]
             # print(R)
             # theta = ca.DM(Euler.from_dcm(R))

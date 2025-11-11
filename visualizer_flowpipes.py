@@ -36,7 +36,7 @@ class CameraNetworkVisualizer(Node):
 
     def cmdloop_callback(self):
         self.points = []
-        for i in range(30):
+        for i in range(25):
             for j in range(self.flowpipes[i].shape[0]):
                 point =np.zeros((3,1))
                 point[0] = self.flowpipes[i][j,0]
@@ -51,11 +51,11 @@ class CameraNetworkVisualizer(Node):
     
 def convex_hull(points):
     marker = Marker()
-    marker.header.frame_id = 'odom'
+    marker.header.frame_id = 'map'
     marker.color.b = 0.3 #0.3 #0.3
     marker.color.r = 1.0 #1.0
     marker.color.g = 0.8 #0.3 #0.8 #0.1
-    marker.color.a = 0.6
+    marker.color.a = 0.2
     marker.type = Marker.LINE_STRIP
     marker.scale.x = 0.01
     marker.pose.orientation.w = 1.0

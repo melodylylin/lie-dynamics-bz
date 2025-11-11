@@ -4,11 +4,21 @@ import control
 import itertools
 import scipy
 
+Jx = 0.02166666666666667
+Jy = 0.02166666666666667
+Jz = 0.04000000000000001
+Jxz = 0.0
+J = np.diag([Jx, Jy, Jz])
+
+def skew(a):
+    return np.array([[0, -a[2], a[1]],
+                    [a[2], 0, -a[0]],
+                    [-a[1], a[0], 0]])
+
 def omega_solve_control_gain(omega1, omega2, omega3):
     # A = np.zeros((3,3))
-    A =  -np.array([[0, -omega3, omega2],
-                    [omega3, 0, -omega1],
-                    [-omega2, omega1, 0]])
+    omega = np.array([omega1, omega2, omega3])
+    A =  np.linalg.inv(J)@(skew(J@omega)-J@skew(omega)-skew(omega)@J)
     B = np.array([[1, 0, 0],
                   [0, 1, 0],
                   [0, 0, 1]]) # control alpha1,2,3

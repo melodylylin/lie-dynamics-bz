@@ -142,22 +142,32 @@ def get_flowpipes():
     omega3 = [np.min(ref['omega_3']), np.max(ref['omega_3'])]
 
     # Set disturbance here
-    w1 = 0.05 #0.05 #0.75 # disturbance for translational (impact a)
-    w2 = 0 # disturbance for angular (impact alpha)
+    w1 = 2 * 0.0  #0.05 #0.75 # disturbance for translational (impact a)
+    w2 = 1.25 # disturbance for angular (impact alpha)
+
+    sol = find_omega_invariant_set(omega1, omega2, omega3) 
+
+    # Initial condition
+    P_omega = sol['P']
+    e0_omega = np.array([0,0,0]) # initial error
+    beta_omega = (e0_omega.T@P_omega@e0_omega) # initial Lyapnov value
+
+    # find bound
+    omegabound = omega_bound(omega1, omega2, omega3, w2, beta_omega) 
 
     sol_LMI = find_se23_invariant_set(ax, ay, az, omega1, omega2, omega3)
     print('finished computing LMI')
 
     # Initial condition
-    e = np.array([0.1,0.1,0,0,0,0,0,0,0]) # initial error in Lie group (nonlinear)
+    e = np.array([0,0,0,0,0,0,0,0,0]) # initial error in Lie group (nonlinear)
 
     # transfer initial error to Lie algebra (linear)
     e0 = ca.DM(SE23Dcm.vee(SE23Dcm.log(SE23Dcm.matrix(e))))
     e0 = np.array([e0]).reshape(9,)
     ebeta = e0.T@sol_LMI['P']@e0
     # Calculate convex hull for flow pipes
-    n = 30 # number of flow pipes
-    flowpipes_traj, intervalhull_traj, nom_traj, t_vect = flowpipes_3d(ref, n, ebeta, w1, w2, sol_LMI)
+    n = 25 # number of flow pipes
+    flowpipes_traj, intervalhull_traj, nom_traj, t_vect = flowpipes_3d(ref, n, ebeta, w1, 2.8*omegabound, sol_LMI)
     # with open('flowpipes.npy', 'wb') as f:
     #     np.save(f, np.array(flowpipes_traj))
     return flowpipes_traj

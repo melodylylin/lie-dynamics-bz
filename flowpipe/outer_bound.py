@@ -77,8 +77,8 @@ def find_se23_invariant_set(ax,ay,az,omega1,omega2,omega3, verbosity=0):
     A = -np.array(ca.DM(lie.se23.elem(ca.DM([0, 0, 0, 0, 0, 9.8, 0, 0, 0])).ad()+SE23Dcm.adC_matrix()))
     #A = -ca.DM(se23.elem(ca.vertcat(0, 0, 0, 0, 0, 9.8, 0, 0, 0)).ad() + adC_matrix())
     B = np.eye(9)
-    Q = 8*np.eye(9)
-    R = np.eye(9)
+    Q = 1*ca.diag(ca.vertcat(5, 5, 5, 30, 30, 15, 1, 1, 1))  # penalize state
+    R = 1*np.eye(9)
     K, _, _ = control.lqr(A, B, Q, R)
 
     A_list = []
@@ -103,7 +103,7 @@ def find_se23_invariant_set(ax,ay,az,omega1,omega2,omega3, verbosity=0):
     print(-np.real(np.max(eig)))
     # alpha_opt = scipy.optimize.fminbound(lambda alpha: solve_lmi(alpha, A_list, verbosity=verbosity)['cost'], x1=0.001, x2=-np.real(np.max(eig)), disp=True if verbosity > 0 else False)
         
-    sol = solve_lmi(1, A_list)
+    sol = solve_lmi(0.74, A_list) #solve_lmi(1, A_list)
         
     return sol
 
@@ -135,7 +135,7 @@ def se23_invariant_set_points_theta(sol, t, w1_norm, w2_norm, beta): # w1_norm: 
     return R@points, val
 
 def se23_invariant_set_points_v(sol, t, w1_norm, w2_norm, beta): # w1_norm: a, w2_norm: omega
-    val = np.real(beta*np.exp(-sol['alpha']*t) + (sol['mu2']*w1_norm**2 + sol['mu3']*w2_norm**2)*(1-np.exp(-sol['alpha']*t)))+0.01 # V(t)
+    val = np.real(beta*np.exp(-sol['alpha']*t) + (sol['mu2']*w1_norm**2 + sol['mu3']*w2_norm**2)*(1-np.exp(-sol['alpha']*t)))+0.0 # V(t)
     # 1 = xT(P/V(t))x, equation for the ellipse
     P1 = sol['P']/val
     A1 = P1[0:3, 0:3]
@@ -174,7 +174,7 @@ def se23_invariant_set_points_v(sol, t, w1_norm, w2_norm, beta): # w1_norm: a, w
     return R@points, val
 
 def se23_invariant_set_points(sol, t, w1_norm, w2_norm, beta): # w1_norm: a, w2_norm: omega
-    val = np.real(beta*np.exp(-sol['alpha']*t) + (sol['mu2']*w1_norm**2 + sol['mu3']*w2_norm**2)*(1-np.exp(-sol['alpha']*t))) + 0.1#+0.25 # V(t)
+    val = np.real(beta*np.exp(-sol['alpha']*t) + (sol['mu2']*w1_norm**2 + sol['mu3']*w2_norm**2)*(1-np.exp(-sol['alpha']*t))) + 0.0 # V(t)
     # 1 = xT(P/V(t))x, equation for the ellipse
     P1 = sol['P']/val
     A1 = P1[:3,:3]

@@ -146,7 +146,7 @@ def flowpipes_3d(ref, n, beta, w1, omegabound, sol):
         p1_vertices = P1.V
         p_vertices = P.V
 
-        p_vertices = np.append(p_vertices, p_vertices[0].reshape(1,3), axis = 0) # add the first point to last, or the flow pipes will miss one line
+        # p_vertices = np.append(p_vertices, p_vertices[0].reshape(1,3), axis = 0) # add the first point to last, or the flow pipes will miss one line
         
         # create list for flow pipes and interval hull
         flowpipes.append(p_vertices)
@@ -156,12 +156,13 @@ def flowpipes_3d(ref, n, beta, w1, omegabound, sol):
     return flowpipes, intervalhull, nom, t_vect
 
 
-def plot_flowpipes(nom, flowpipes, n, axis):
+def plot_flowpipes(nom, flowpipes, data, n, axis):
     # flow pipes
     plt.figure(figsize=(15,15))
-    h_nom = plt.plot(nom[:,0], nom[:,1], color='k', linestyle='-')
+    h_nom = plt.plot(nom[:,0], nom[:,1], color='r', linestyle='-')
+    h_odom = plt.plot(data['odom']['x'][7569:], data['odom']['y'][7569:], label='true')
     for facet in range(n):
-        hs_ch_LMI = plt.plot(flowpipes[facet][:,0], flowpipes[facet][:,1], color='c', linestyle='--')
+        hs_ch_LMI = plt.plot(flowpipes[facet][:,0], flowpipes[facet][:,1], color='c', alpha=0.2, linestyle='--')
 
     # plt.axis('equal')
     plt.title('Flow Pipes')
