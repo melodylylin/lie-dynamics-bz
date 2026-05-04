@@ -143,7 +143,7 @@ def get_flowpipes():
 
     # Set disturbance here
     w1 = 2 * 0.0  #0.05 #0.75 # disturbance for translational (impact a)
-    w2 = 1.25 # disturbance for angular (impact alpha)
+    w2 = 0.13 # disturbance for angular (impact alpha)
 
     sol = find_omega_invariant_set(omega1, omega2, omega3) 
 

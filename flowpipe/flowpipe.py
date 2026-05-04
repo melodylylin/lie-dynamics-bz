@@ -14,9 +14,9 @@ def rotate_point(point, angle):
 
 def flowpipes(ref, n, beta, w1, omegabound, sol, axis):
 
-    x_r = ref['x']
-    y_r = ref['y']
-    z_r = ref['z']
+    x_r = ref['x'][2650:]+ref['x'][:2650]
+    y_r = ref['y'][2650:]+ref['y'][:2650]
+    z_r = ref['z'][2650:]+ref['z'][:2650]
     
     #####NEED to change this if wants to show different axis#####
     if axis == 'xy':
@@ -94,9 +94,9 @@ def flowpipes(ref, n, beta, w1, omegabound, sol, axis):
     return flowpipes, intervalhull, nom, t_vect
 
 def flowpipes_3d(ref, n, beta, w1, omegabound, sol):
-    x_r = ref['x']
-    y_r = ref['y']
-    z_r = ref['z']
+    x_r = ref['x'][2650:]+ref['x'][:2650]
+    y_r = ref['y'][2650:]+ref['y'][:2650]
+    z_r = ref['z'][2650:]+ref['z'][:2650]
     
     #####NEED to change this if wants to show different axis#####
     nom = np.array([x_r,y_r,z_r]).T
@@ -135,7 +135,8 @@ def flowpipes_3d(ref, n, beta, w1, omegabound, sol):
             points_theta, _ = se23_invariant_set_points_theta(sol, 0.05*b, w1, omegabound, beta)
 
         inv_points = exp_map(points, points_theta)
-
+        print(np.max(inv_points[0,:]), np.max(inv_points[1,:]), np.max(inv_points[2,:]))
+        print(np.min(inv_points[0,:]), np.min(inv_points[1,:]), np.min(inv_points[2,:]))
         P2 = Polytope(inv_points.T) 
         
         # minkowski sum
@@ -156,13 +157,51 @@ def flowpipes_3d(ref, n, beta, w1, omegabound, sol):
     return flowpipes, intervalhull, nom, t_vect
 
 
-def plot_flowpipes(nom, flowpipes, data, n, axis):
+def plot_flowpipes(nom, flowpipes, data, n, axis, x_act, y_act):
     # flow pipes
     plt.figure(figsize=(15,15))
-    h_nom = plt.plot(nom[:,0], nom[:,1], color='r', linestyle='-')
-    h_odom = plt.plot(data['odom']['x'][7569:], data['odom']['y'][7569:], label='true')
+    plt.rcParams.update({'font.size': 20})
+    # h_odom = plt.plot(data['odom']['x'][56850:], data['odom']['y'][56850:], label='True', color='orange')
+    # h_odom = plt.plot(data['odom']['x'][:25000], data['odom']['y'][:25000], label='True',color='orange')
+    h_odom = plt.plot(data['odom']['x'][38500:], data['odom']['y'][38500:],  label='True', color='orange')
+    # h_odom = plt.plot(data['odom']['x'][50000:], data['odom']['y'][50000:], label='True',color='orange')
+    # h_odom = plt.plot(data['odom']['x'][:], data['odom']['y'][:], label='True', color='orange')
+    # plt.plot(x_act, y_act)
+    h_nom = plt.plot(nom[:,0], nom[:,1], linestyle='-')
+
     for facet in range(n):
         hs_ch_LMI = plt.plot(flowpipes[facet][:,0], flowpipes[facet][:,1], color='c', alpha=0.2, linestyle='--')
+    
+    # for facet in range(5,m):
+    #     hs_ch_LMI2 = plt.plot(flowpipes2[facet][:,0], flowpipes2[facet][:,1], color='c', alpha=0.2, linestyle='--')
+
+    # plt.axis('equal')
+    plt.title('Flow Pipes')
+    if axis == 'xy':
+        plt.ylabel('y, m')
+    elif axis == 'xz':
+        plt.ylabel('z')
+    plt.xlabel('x, m')
+    lgd = plt.legend(loc=2, prop={'size': 18})
+    plt.grid(True)
+    ax = lgd.axes
+    handles, labels = ax.get_legend_handles_labels()
+    handles.append(h_nom[0])
+    labels.append('Reference')
+    handles.append(hs_ch_LMI[0])
+    labels.append('Flow Pipes')
+    lgd._legend_box = None
+    lgd._init_legend_box(handles, labels)
+    lgd._set_loc(lgd._loc)
+    lgd.set_title(lgd.get_title().get_text())
+
+def plot_flowpipes_timehis(nom, flowpipes, data, n, axis):
+    # flow pipes
+    plt.figure(figsize=(15,15))
+    for facet in range(n):
+        hs_ch_LMI = plt.plot(flowpipes[facet][:,0], flowpipes[facet][:,2], color='c', alpha=0.2, linestyle='--')
+    h_nom = plt.plot(nom[:,0], nom[:,1], color='r', linestyle='-')
+    h_odom = plt.plot(data['odom']['t'][0:], data['odom']['z'][0:], label='True')
 
     # plt.axis('equal')
     plt.title('Flow Pipes')
@@ -172,10 +211,11 @@ def plot_flowpipes(nom, flowpipes, data, n, axis):
         plt.ylabel('z')
     plt.xlabel('x')
     lgd = plt.legend(loc=2, prop={'size': 18})
+    plt.grid(True)
     ax = lgd.axes
     handles, labels = ax.get_legend_handles_labels()
     handles.append(h_nom[0])
-    labels.append('Reference Trajectory')
+    labels.append('Reference')
     handles.append(hs_ch_LMI[0])
     labels.append('Flow Pipes')
     lgd._legend_box = None
